@@ -1,6 +1,11 @@
 from flask import Flask, render_template, request, jsonify
+import os
+from dotenv import load_dotenv
 from core.database import init_db, query_db, insert_db, delete_db, update_db
 from core.algorithm import run_closest_pair, brute_force_closest_pair
+
+# Load environment variables
+load_dotenv()
 
 app = Flask(__name__)
 
@@ -11,7 +16,8 @@ init_db()
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    google_maps_api_key = os.getenv('GOOGLE_MAPS_API_KEY', 'YOUR_API_KEY_HERE')
+    return render_template('index.html', google_maps_api_key=google_maps_api_key)
 
 @app.route('/admin')
 def admin():

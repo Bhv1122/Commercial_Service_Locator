@@ -126,5 +126,5 @@
 <script src="{{ url_for('static', filename='js/visualization.js') }}"></script>
 <script src="{{ url_for('static', filename='js/map.js') }}?v=2"></script>
 <script async defer
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAVAEnGy6HLelMMsY5YC41yE5KXPOwiPSM&libraries=places&callback=initMap"></script>
+    src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=places&callback=initMap"></script>
 {% endblock %}
