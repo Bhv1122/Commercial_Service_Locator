@@ -1,0 +1,24 @@
+@layer utilities {
+    .glass {
+        background-color: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+}
+
+.pattern-grid {
+    background-image: linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+
+circle {
+    transition: all 0.3s ease-in-out;
+}
+line {
+    transition: opacity 0.3s ease-in-out;
+}
+rect {
+    transition: all 0.3s ease-in-out;
+}
