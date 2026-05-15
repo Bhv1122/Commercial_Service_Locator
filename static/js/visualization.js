@@ -1,11 +1,12 @@
 class Visualizer {
-    constructor(canvas, ctx) {
-        this.canvas = canvas;
-        this.ctx = ctx;
+    constructor(map) {
+        this.map = map;
         this.steps = [];
         this.points = [];
         this.isAnimating = false;
         this.animationSpeed = 800; // ms per step
+        
+        this.overlays = []; // Track map overlays to clear them
     }
 
     setPoints(points) {
@@ -13,25 +14,19 @@ class Visualizer {
     }
 
     async animate(steps, finalPair) {
+        this.clearOverlays();
         this.steps = steps;
         this.isAnimating = true;
 
         for (let step of this.steps) {
             if (!this.isAnimating) break;
-            
-            // Draw points base state
-            window.mapInstance.drawBase();
-            
             this.renderStep(step);
             await this.sleep(this.animationSpeed);
         }
 
-        // Final state
-        window.mapInstance.drawBase();
         if (finalPair) {
-            this.drawConnection(finalPair[0], finalPair[1], '#10b981', 3); // Emerald
+            this.drawConnection(finalPair[0], finalPair[1], '#10b981', 4); // Emerald
             
-            // Highlight the two points
             const p1 = this.points.find(p => p.id === finalPair[0].id);
             const p2 = this.points.find(p => p.id === finalPair[1].id);
             if (p1) this.drawHighlight(p1, '#10b981');
@@ -41,28 +36,77 @@ class Visualizer {
         this.isAnimating = false;
     }
 
+    showMultipleFinalPairs(pairs) {
+        this.clearOverlays();
+        
+        // pairs is an array of pairs: [ {pair: [p1, p2], type: 'hospital'}, ... ]
+        for (let item of pairs) {
+            if (!item.pair) continue;
+            let color = '#10b981';
+            if (item.type === 'hospital') color = '#3b82f6';
+            else if (item.type === 'police') color = '#60a5fa';
+            else if (item.type === 'fire') color = '#f97316';
+            
+            const p1 = this.points.find(p => p.id === item.pair[0].id);
+            const p2 = this.points.find(p => p.id === item.pair[1].id);
+            if (p1 && p2) {
+                this.drawConnection(p1, p2, color, 4);
+                this.drawHighlight(p1, color);
+                this.drawHighlight(p2, color);
+            }
+        }
+    }
+
     renderStep(step) {
         if (step.type === 'split') {
-            // Draw vertical split line
-            this.ctx.beginPath();
-            this.ctx.moveTo(step.mid_x, 0);
-            this.ctx.lineTo(step.mid_x, this.canvas.height);
-            this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-            this.ctx.setLineDash([5, 5]);
-            this.ctx.lineWidth = 2;
-            this.ctx.stroke();
-            this.ctx.setLineDash([]);
+            const bounds = this.map.getBounds();
+            if (!bounds) return;
+            const ne = bounds.getNorthEast();
+            const sw = bounds.getSouthWest();
             
-            // Highlight left/right areas
-            this.ctx.fillStyle = 'rgba(59, 130, 246, 0.05)';
-            this.ctx.fillRect(0, 0, step.mid_x, this.canvas.height);
-            this.ctx.fillStyle = 'rgba(244, 63, 94, 0.05)';
-            this.ctx.fillRect(step.mid_x, 0, this.canvas.width - step.mid_x, this.canvas.height);
+            const line = new google.maps.Polyline({
+                path: [
+                    { lat: ne.lat(), lng: step.mid_x },
+                    { lat: sw.lat(), lng: step.mid_x }
+                ],
+                geodesic: true,
+                strokeColor: '#ffffff',
+                strokeOpacity: 0.5,
+                strokeWeight: 2,
+                map: this.map
+            });
+            this.overlays.push(line);
+            
+            // Draw left/right colored overlays
+            const leftRect = new google.maps.Rectangle({
+                bounds: {
+                    north: ne.lat(),
+                    south: sw.lat(),
+                    east: step.mid_x,
+                    west: sw.lng()
+                },
+                fillColor: '#3b82f6',
+                fillOpacity: 0.05,
+                strokeWeight: 0,
+                map: this.map
+            });
+            this.overlays.push(leftRect);
+            
+            const rightRect = new google.maps.Rectangle({
+                bounds: {
+                    north: ne.lat(),
+                    south: sw.lat(),
+                    east: ne.lng(),
+                    west: step.mid_x
+                },
+                fillColor: '#f43f5e',
+                fillOpacity: 0.05,
+                strokeWeight: 0,
+                map: this.map
+            });
+            this.overlays.push(rightRect);
         }
         else if (step.type === 'strip_check') {
-            // Highlight strip region
-            // We don't have mid_x directly in step, but we can draw a strip
-            // Actually, we could infer it or just highlight the points
             step.strip_points.forEach(pid => {
                 const p = this.points.find(x => x.id === pid);
                 if (p) this.drawHighlight(p, '#f59e0b'); // Amber
@@ -80,30 +124,44 @@ class Visualizer {
     }
 
     drawConnection(p1, p2, color, width) {
-        this.ctx.beginPath();
-        this.ctx.moveTo(p1.x, p1.y);
-        this.ctx.lineTo(p2.x, p2.y);
-        this.ctx.strokeStyle = color;
-        this.ctx.lineWidth = width;
-        this.ctx.stroke();
+        const line = new google.maps.Polyline({
+            path: [
+                { lat: p1.y, lng: p1.x },
+                { lat: p2.y, lng: p2.x }
+            ],
+            geodesic: true,
+            strokeColor: color,
+            strokeOpacity: 0.8,
+            strokeWeight: width,
+            map: this.map
+        });
+        this.overlays.push(line);
     }
 
     drawHighlight(p, color) {
-        this.ctx.beginPath();
-        this.ctx.arc(p.x, p.y, 12, 0, Math.PI * 2);
-        this.ctx.strokeStyle = color;
-        this.ctx.lineWidth = 2;
-        this.ctx.stroke();
-        
-        this.ctx.beginPath();
-        this.ctx.arc(p.x, p.y, 16, 0, Math.PI * 2);
-        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-        this.ctx.lineWidth = 1;
-        this.ctx.stroke();
+        const circle = new google.maps.Circle({
+            strokeColor: color,
+            strokeOpacity: 0.8,
+            strokeWeight: 2,
+            fillColor: color,
+            fillOpacity: 0.35,
+            map: this.map,
+            center: { lat: p.y, lng: p.x },
+            radius: 500 // meters, approx
+        });
+        this.overlays.push(circle);
+    }
+
+    clearOverlays() {
+        for (let overlay of this.overlays) {
+            overlay.setMap(null);
+        }
+        this.overlays = [];
     }
 
     stop() {
         this.isAnimating = false;
+        this.clearOverlays();
     }
 
     sleep(ms) {

@@ -97,5 +97,38 @@ def run_algorithm():
         'divide_and_conquer': dc_result
     })
 
+@app.route('/api/algorithm/find_all', methods=['POST'])
+def run_algorithm_all():
+    data = request.json
+    points_data = data.get('points', [])
+    
+    formatted_points = []
+    for p in points_data:
+        formatted_points.append((p['x'], p['y'], p['id'], p['type'], p))
+        
+    emergencies = [p for p in formatted_points if p[3] == 'emergency']
+    if not emergencies:
+        return jsonify({'error': 'No emergency point found'}), 400
+        
+    emergency = emergencies[0] # assume 1 main emergency
+    
+    results = {}
+    total_time = 0
+    
+    for stype in ['hospital', 'police', 'fire']:
+        # Filter points to just this emergency and this specific service type
+        subset = [emergency] + [p for p in formatted_points if p[3] == 'service' and p[4].get('subtype') == stype]
+        if len(subset) > 1:
+            res = run_closest_pair(subset)
+            total_time += res['time_ms']
+            results[stype] = res
+        else:
+            results[stype] = None
+            
+    return jsonify({
+        'results': results,
+        'total_time_ms': total_time
+    })
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
