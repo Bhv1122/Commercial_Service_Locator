@@ -275,9 +275,15 @@ class MapController {
                 document.getElementById('res-all').classList.add('hidden');
                 
                 if (dc.closest_pair) {
-                    const svc = dc.closest_pair[0].type === 'service' ? dc.closest_pair[0] : dc.closest_pair[1];
+                    const p1 = dc.closest_pair[0];
+                    const p2 = dc.closest_pair[1];
+                    const svc = p1.type === 'service' ? p1 : p2;
                     const ratingStr = svc.rating && svc.rating !== 'N/A' ? ` ⭐ ${svc.rating}` : '';
                     document.getElementById('res-service').textContent = svc.subtype.toUpperCase() + (svc.name && svc.name !== 'Unknown' ? ` (${svc.name})` : '') + ratingStr;
+                    
+                    if (document.getElementById('res-formula-sub')) {
+                        document.getElementById('res-formula-sub').innerHTML = `d = &radic;((${p2.x.toFixed(4)} - ${p1.x.toFixed(4)})&sup2; + (${p2.y.toFixed(4)} - ${p1.y.toFixed(4)})&sup2;) <br>d &approx; ${dc.min_dist.toFixed(5)} degrees`;
+                    }
                 }
                 
                 document.getElementById('res-dist').textContent = dc.min_dist === Infinity ? 'None' : (dc.min_dist * 111).toFixed(2) + ' approx km';

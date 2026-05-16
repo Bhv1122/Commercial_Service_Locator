@@ -5,7 +5,7 @@ def euclidean_distance(p1, p2):
     # p1 and p2 are (x, y, id, type, data_dict)
     if p1[3] == p2[3]:
         return float('inf') # Infinity if both are services or both are emergencies
-    return math.sqrt((p1[0] - p2[0])**2 + p1[1] - p2[1]**2) # wait, math error: (p1[1] - p2[1])**2
+    return math.sqrt((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2)
 
 def brute_force_closest_pair(points):
     min_dist = float('inf')
