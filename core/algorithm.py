@@ -3,9 +3,15 @@ import time
 
 def euclidean_distance(p1, p2):
     # p1 and p2 are (x, y, id, type, data_dict)
-    if p1[3] == p2[3]:
-        return float('inf') # Infinity if both are services or both are emergencies
+    # Allow pairing between user/emergency and service
+    t1 = p1[3]
+    t2 = p2[3]
+    if t1 == t2:
+        return float('inf')  # Don't pair two services or two user points
+    if t1 == 'service' and t2 == 'service':
+        return float('inf')
     return math.sqrt((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2)
+
 
 def brute_force_closest_pair(points):
     min_dist = float('inf')
@@ -17,7 +23,10 @@ def brute_force_closest_pair(points):
     for i in range(n):
         for j in range(i + 1, n):
             comparisons += 1
-            if points[i][3] != points[j][3]:
+            ti, tj = points[i][3], points[j][3]
+            # Valid pair: one side must be 'service', the other is user/emergency
+            valid = (ti == 'service') != (tj == 'service')
+            if valid:
                 dist = math.sqrt((points[i][0] - points[j][0])**2 + (points[i][1] - points[j][1])**2)
                 if dist < min_dist:
                     min_dist = dist
@@ -98,7 +107,9 @@ def divide_and_conquer_closest_pair(points_x, points_y, depth=0, viz_steps=None)
     for i in range(strip_len):
         for j in range(i + 1, min(i + 7, strip_len)):
             comparisons += 1
-            if strip[i][3] != strip[j][3]:
+            ti, tj = strip[i][3], strip[j][3]
+            valid = (ti == 'service') != (tj == 'service')
+            if valid:
                 dist = math.sqrt((strip[i][0] - strip[j][0])**2 + (strip[i][1] - strip[j][1])**2)
                 if dist < min_dist:
                     min_dist = dist

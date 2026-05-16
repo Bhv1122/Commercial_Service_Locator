@@ -19,6 +19,27 @@ def index():
     google_maps_api_key = os.getenv('GOOGLE_MAPS_API_KEY', 'YOUR_API_KEY_HERE')
     return render_template('index.html', google_maps_api_key=google_maps_api_key)
 
+@app.route('/places/<category>')
+def places(category):
+    google_maps_api_key = os.getenv('GOOGLE_MAPS_API_KEY', 'YOUR_API_KEY_HERE')
+    # Category metadata for the page
+    category_info = {
+        'hospital':     {'label': 'Hospitals',       'icon': 'fa-hospital',          'color': '#3b82f6'},
+        'police':       {'label': 'Police Stations',  'icon': 'fa-shield-halved',     'color': '#818cf8'},
+        'fire_station': {'label': 'Fire Stations',    'icon': 'fa-fire-extinguisher', 'color': '#f97316'},
+        'supermarket':  {'label': 'Supermarkets',     'icon': 'fa-cart-shopping',     'color': '#10b981'},
+        'pharmacy':     {'label': 'Pharmacies',       'icon': 'fa-pills',             'color': '#ec4899'},
+        'gas_station':  {'label': 'Gas Stations',     'icon': 'fa-gas-pump',          'color': '#eab308'},
+    }
+    info = category_info.get(category, {'label': category.replace('_', ' ').title(), 'icon': 'fa-map-pin', 'color': '#8b5cf6'})
+    return render_template('places.html',
+        google_maps_api_key=google_maps_api_key,
+        category=category,
+        category_label=info['label'],
+        category_icon=info['icon'],
+        category_color=info['color']
+    )
+
 @app.route('/admin')
 def admin():
     return render_template('admin.html')
@@ -70,37 +91,44 @@ def add_request():
 def run_algorithm():
     data = request.json
     points_data = data.get('points', [])
-    
+
     if not points_data:
-        # Fetch from DB if no points provided
-        services = query_db("SELECT * FROM services")
-        reqs = query_db("SELECT * FROM requests ORDER BY id DESC LIMIT 1") # Get latest request
-        if services:
-            for s in services:
-                points_data.append((s['x'], s['y'], f"s_{s['id']}", 'service', dict(s)))
-        if reqs:
-            r = reqs[0]
-            points_data.append((r['x'], r['y'], f"r_{r['id']}", 'emergency', dict(r)))
-            
-    else:
-        # points_data should be [ {id, x, y, type, ...} ]
-        formatted_points = []
-        for p in points_data:
-            formatted_points.append((p['x'], p['y'], p['id'], p['type'], p))
-        points_data = formatted_points
+        return jsonify({'error': 'No points provided'}), 400
+
+    # Convert JSON dicts to algorithm tuples: (x, y, id, type, data_dict)
+    formatted_points = []
+    for p in points_data:
+        # Treat 'user' type same as 'emergency' for pairing logic
+        ptype = p.get('type', 'service')
+        formatted_points.append((p['x'], p['y'], p['id'], ptype, p))
+    points_data = formatted_points
 
     if len(points_data) < 2:
         return jsonify({'error': 'Not enough points to find a pair'}), 400
 
     # Run Brute Force
     bf_result = brute_force_closest_pair(points_data)
-    
+
     # Run Divide & Conquer
     dc_result = run_closest_pair(points_data)
-    
+
+    # Serialize closest_pair tuples -> dicts for JSON
+    def serialize_result(res):
+        cp = res.get('closest_pair')
+        raw_dist = res.get('min_dist')
+        # Replace Infinity / NaN with None so JSON serialization doesn't break
+        dist = None if (raw_dist is None or raw_dist == float('inf') or raw_dist != raw_dist) else raw_dist
+        return {
+            'closest_pair': [cp[0][4], cp[1][4]] if cp else None,
+            'min_dist': dist,
+            'comparisons': res.get('comparisons', 0),
+            'time_ms': res.get('time_ms', 0),
+            'viz_steps': res.get('viz_steps', [])
+        }
+
     return jsonify({
-        'brute_force': bf_result,
-        'divide_and_conquer': dc_result
+        'brute_force': serialize_result(bf_result),
+        'divide_and_conquer': serialize_result(dc_result)
     })
 
 @app.route('/api/algorithm/find_all', methods=['POST'])

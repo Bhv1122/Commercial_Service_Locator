@@ -49,19 +49,21 @@ body {
     position: relative;
     overflow: hidden;
     cursor: crosshair;
-    background: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 39px,
-        rgba(255, 255, 255, 0.05) 39px,
-        rgba(255, 255, 255, 0.05) 40px
-    ),
-    repeating-linear-gradient(
-        90deg,
-        transparent,
-        transparent 39px,
-        rgba(255, 255, 255, 0.05) 39px,
-        rgba(255, 255, 255, 0.05) 40px
-    );
     background-color: #0b1120;
+}
+
+/* Active category button */
+.cat-btn.active-cat {
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.15);
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.25);
+    color: #fff;
+}
+
+/* Result list items */
+#results-list::-webkit-scrollbar { width: 4px; }
+#results-list::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+
+.result-item:hover {
+    transform: translateX(2px);
 }
