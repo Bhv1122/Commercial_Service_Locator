@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-8 pb-12">
+    <div class="text-center space-y-4">
+        <h1 class="text-4xl font-extrabold text-white"><span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Divide & Conquer:</span> Closest Pair of Points</h1>
+        <p class="text-lg text-slate-400">Understanding the core algorithm powering our Emergency Service Locator.</p>
+    </div>
+
+    <!-- Section 1 -->
+    <div class="card-glass p-8">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="bg-primary/20 p-3 rounded-lg text-primary">
+                <i class="fa-solid fa-book-open text-xl"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-white">The Problem Statement</h2>
+        </div>
+        <p class="text-slate-300 leading-relaxed mb-4">
+            Given a set of \(n\) points in a 2D plane, find the pair of points with the smallest Euclidean distance between them. 
+            In our context, we are finding the minimum distance between an Emergency Request point and the set of available Service Units (Hospitals, Police, Fire Stations).
+        </p>
+        <div class="bg-slate-900/80 p-4 rounded-lg border border-slate-700 font-mono text-sm text-emerald-400">
+            Euclidean Distance Formula: d(p1, p2) = √((x2 - x1)² + (y2 - y1)²)
+        </div>
+    </div>
+
+    <!-- Section 2 -->
+    <div class="card-glass p-8">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="bg-secondary/20 p-3 rounded-lg text-secondary">
+                <i class="fa-solid fa-code text-xl"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-white">The Naive Approach (Brute Force)</h2>
+        </div>
+        <p class="text-slate-300 leading-relaxed mb-4">
+            The simplest way to find the closest pair is to calculate the distance between every possible pair of points and keep track of the minimum.
+        </p>
+        <ul class="list-disc list-inside text-slate-400 space-y-2 ml-4">
+            <li>Compare point 1 with points 2, 3...n</li>
+            <li>Compare point 2 with points 3...n</li>
+            <li>Requires \(n(n-1)/2\) comparisons.</li>
+        </ul>
+        <div class="mt-4 inline-block bg-orange-500/10 border border-orange-500/20 text-orange-400 px-4 py-2 rounded-lg font-bold">
+            Time Complexity: O(n²)
+        </div>
+    </div>
+
+    <!-- Section 3 -->
+    <div class="card-glass p-8 relative overflow-hidden">
+        <div class="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-primary/10 rounded-full blur-2xl"></div>
+        <div class="flex items-center gap-3 mb-4 relative z-10">
+            <div class="bg-emerald-500/20 p-3 rounded-lg text-emerald-400">
+                <i class="fa-solid fa-network-wired text-xl"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-white">The Divide & Conquer Approach</h2>
+        </div>
+        <p class="text-slate-300 leading-relaxed mb-4 relative z-10">
+            To optimize the search, we can use the Divide and Conquer paradigm. The algorithm works as follows:
+        </p>
+        <ol class="list-decimal list-inside text-slate-400 space-y-4 ml-4 relative z-10">
+            <li><strong class="text-white">Sort:</strong> Sort all points by their x-coordinates.</li>
+            <li><strong class="text-white">Divide:</strong> Split the points into two equal halves by a vertical line.</li>
+            <li><strong class="text-white">Conquer:</strong> Recursively find the closest pair in the left half and the right half. Let the minimum of these two distances be \(d\).</li>
+            <li><strong class="text-white">Combine (The Strip):</strong> The closest pair might span across the dividing line. Create a strip of width \(2d\) centered at the dividing line. Sort the points in this strip by their y-coordinates.</li>
+            <li><strong class="text-white">Check Strip:</strong> For each point in the strip, check the distance to the next 7 points. This mathematical bound ensures we only do a constant number of comparisons per point in the strip.</li>
+        </ol>
+        <div class="mt-6 flex flex-wrap gap-4 relative z-10">
+            <div class="bg-primary/10 border border-primary/20 text-primary px-4 py-2 rounded-lg font-bold">
+                Time Complexity: O(n log n)
+            </div>
+            <div class="bg-slate-800 border border-slate-700 text-slate-300 px-4 py-2 rounded-lg font-bold font-mono text-sm flex items-center">
+                T(n) = 2T(n/2) + O(n)
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

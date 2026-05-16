@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card-glass p-8 h-[calc(100vh-10rem)] overflow-y-auto">
+    <div class="flex justify-between items-center border-b border-slate-600 pb-4 mb-6">
+        <h1 class="text-3xl font-bold text-white"><i class="fa-solid fa-user-shield text-primary mr-2"></i> Admin Dashboard</h1>
+        <button class="bg-primary hover:bg-blue-600 text-white py-2 px-4 rounded-lg font-medium transition flex items-center gap-2">
+            <i class="fa-solid fa-plus"></i> Add Service
+        </button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Add Service Form -->
+        <div class="bg-slate-800/50 p-6 rounded-lg border border-slate-700">
+            <h2 class="text-xl font-bold text-white mb-4">Register New Service Unit</h2>
+            <form id="add-service-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-400 mb-1">Unit Name</label>
+                    <input type="text" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-white focus:outline-none focus:border-primary" placeholder="e.g., Central Hospital Amb-01">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-400 mb-1">Type</label>
+                        <select class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-white focus:outline-none focus:border-primary">
+                            <option value="hospital">Hospital</option>
+                            <option value="police">Police</option>
+                            <option value="fire">Fire Station</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-400 mb-1">Status</label>
+                        <select class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-white focus:outline-none focus:border-primary">
+                            <option value="available">Available</option>
+                            <option value="busy">Busy</option>
+                            <option value="offline">Offline</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-400 mb-1">Longitude (X)</label>
+                        <input type="number" step="any" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-white focus:outline-none focus:border-primary">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-400 mb-1">Latitude (Y)</label>
+                        <input type="number" step="any" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-white focus:outline-none focus:border-primary">
+                    </div>
+                </div>
+                <button type="button" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-2 px-4 rounded-lg font-medium transition mt-2">
+                    Save Unit
+                </button>
+            </form>
+        </div>
+
+        <!-- Active Services List -->
+        <div class="bg-slate-800/50 p-6 rounded-lg border border-slate-700 flex flex-col h-[400px]">
+            <h2 class="text-xl font-bold text-white mb-4">Active Database Records</h2>
+            <div class="overflow-y-auto flex-grow pr-2 space-y-3">
+                <div class="bg-slate-900 p-3 rounded border border-slate-700 flex justify-between items-center">
+                    <div>
+                        <div class="font-medium text-white text-sm"><i class="fa-solid fa-hospital text-primary w-5"></i> Central Med</div>
+                        <div class="text-xs text-slate-500">Coord: (120, 340) | <span class="text-emerald-400">Available</span></div>
+                    </div>
+                    <button class="text-red-400 hover:text-red-300"><i class="fa-solid fa-trash"></i></button>
+                </div>
+                <div class="bg-slate-900 p-3 rounded border border-slate-700 flex justify-between items-center">
+                    <div>
+                        <div class="font-medium text-white text-sm"><i class="fa-solid fa-shield-halved text-blue-400 w-5"></i> Downtown Precinct</div>
+                        <div class="text-xs text-slate-500">Coord: (450, 210) | <span class="text-emerald-400">Available</span></div>
+                    </div>
+                    <button class="text-red-400 hover:text-red-300"><i class="fa-solid fa-trash"></i></button>
+                </div>
+                <!-- Placeholder items -->
+                <div class="bg-slate-900 p-3 rounded border border-slate-700 flex justify-between items-center opacity-60">
+                    <div class="text-sm text-slate-400 italic">Connected to SQLite Database...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
