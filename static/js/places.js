@@ -18,13 +18,14 @@ class PlacesPage {
         this.categoryLabel = PAGE_CATEGORY_LABEL;
         this.categoryColor = PAGE_CATEGORY_COLOR;
 
-        // Google Places type mapping (expanded to include local & government places)
+        // Google Places type mapping — uses only valid types from the Places API (New)
+        // Reference: https://developers.google.com/maps/documentation/places/web-service/place-types
         this.typeMap = {
-            hospital:     ['hospital', 'medical_clinic', 'emergency_room', 'doctor'],
-            police:       ['police', 'local_government_office'],
+            hospital:     ['hospital', 'medical_clinic'],
+            police:       ['police'],
             fire_station: ['fire_station'],
-            supermarket:  ['supermarket', 'grocery_store', 'convenience_store', 'market', 'discount_store', 'department_store', 'wholesaler'],
-            pharmacy:     ['pharmacy', 'drugstore', 'medical_clinic', 'hospital'],
+            supermarket:  ['supermarket', 'convenience_store', 'grocery_store'],
+            pharmacy:     ['pharmacy'],
             gas_station:  ['gas_station']
         };
     }
@@ -124,12 +125,14 @@ class PlacesPage {
 
         try {
             const { Place } = await google.maps.importLibrary('places');
-            const center = new google.maps.LatLng(this.userPoint.y, this.userPoint.x);
             const placeTypes = this.typeMap[this.category] || [this.category];
 
             const request = {
                 fields: ['displayName', 'location', 'rating', 'userRatingCount', 'formattedAddress', 'id', 'businessStatus'],
-                locationRestriction: { center, radius },
+                locationRestriction: {
+                    center: { lat: this.userPoint.y, lng: this.userPoint.x },
+                    radius: radius
+                },
                 includedTypes: placeTypes,
                 maxResultCount: 20,
             };
